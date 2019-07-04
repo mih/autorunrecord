@@ -66,8 +66,8 @@ class RunRecord(LiteralInclude):
 
         # Get configuration values for the language
         args = config[language].split()
-        input_encoding = config.get(language + '_input_encoding', 'ascii')
-        output_encoding = config.get(language + '_output_encoding', 'ascii')
+        input_encoding = config.get(language + '_input_encoding', 'utf-8')
+        output_encoding = config.get(language + '_output_encoding', 'utf-8')
         prefix_str = config.get(language + '_prefix_str', '')
 
         # Build the code text
