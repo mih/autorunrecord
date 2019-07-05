@@ -13,7 +13,7 @@ requires = ['Sphinx']
 
 setup(
     name='autorunrecord',
-    version='0.2',
+    version='0.3',
     url='http://github.com/mih/autorunrecord',
     license='BSD',
     author='Michael Hanke',

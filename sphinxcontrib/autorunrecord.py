@@ -41,14 +41,19 @@ class RunRecord(LiteralInclude):
         LiteralInclude.option_spec,
         language=directives.unchanged_required,
         realcommand=directives.unchanged_required,
+        workdir=directives.unchanged_required,
     )
 
     def run(self):
         doc_dir = Path(self.env.srcdir)
         src_file = Path(self.state_machine.get_source(self.lineno))
         capture_file = src_file.parent / self.arguments[0]
-        work_dir = Path(self.env.app.doctreedir).parent / \
-            'wdirs' / src_file.relative_to(doc_dir).parent / src_file.stem
+        work_dir = Path(self.env.app.doctreedir).parent / 'wdirs' / \
+            self.options.get(
+                'workdir',
+                # default is to place the workdir under a relpath that
+                # is the same as the source file's in the doc tree
+                src_file.relative_to(doc_dir).parent / src_file.stem)
         if not work_dir.exists():
             work_dir.mkdir(parents=True)
 
