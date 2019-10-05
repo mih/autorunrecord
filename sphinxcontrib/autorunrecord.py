@@ -48,22 +48,28 @@ class RunRecord(LiteralInclude):
         doc_dir = Path(self.env.srcdir)
         src_file = Path(self.state_machine.get_source(self.lineno))
         capture_file = src_file.parent / self.arguments[0]
-        work_dir = Path(self.env.app.doctreedir).parent / 'wdirs' / \
-            self.options.get(
-                'workdir',
-                # default is to place the workdir under a relpath that
-                # is the same as the source file's in the doc tree
-                src_file.relative_to(doc_dir).parent / src_file.stem)
-        if not work_dir.exists():
-            work_dir.mkdir(parents=True)
-
+        base_wdir = Path(self.env.app.doctreedir).parent \
+            if self.config.autorunrecord_basedir is None \
+            else Path(self.config.autorunrecord_basedir)
+        work_dir = base_wdir / self.options.get(
+            'workdir',
+            # default is to place the workdir under a relpath that
+            # is the same as the source file's in the doc tree
+            src_file.relative_to(doc_dir).parent / src_file.stem)
         if not capture_file.exists():
-            self.capture_output(capture_file, work_dir)
+            if not work_dir.exists():
+                work_dir.mkdir(parents=True)
+
+            self.capture_output(
+                capture_file,
+                work_dir,
+                self.config.autorunrecord_env,
+            )
 
         docnodes = super(RunRecord, self).run()
         return docnodes
 
-    def capture_output(self, capture_file, work_dir):
+    def capture_output(self, capture_file, work_dir, env):
         config = AutoRunRecord.config
         language = self.options.get('language', 'console')
         if language not in config:
@@ -93,6 +99,7 @@ class RunRecord(LiteralInclude):
             # capture both in a merged stream
             stderr=STDOUT,
             cwd=text_type(work_dir),
+            env=env,
         )
 
         # Run the code
@@ -113,5 +120,7 @@ def setup(app):
     app.add_directive('runrecord', RunRecord)
     app.connect('builder-inited', AutoRunRecord.builder_init)
     app.add_config_value('autorunrecord_languages', AutoRunRecord.config, 'env')
+    app.add_config_value('autorunrecord_basedir', None, 'env')
+    app.add_config_value('autorunrecord_env', None, 'env')
 
 # vim: set expandtab shiftwidth=4 softtabstop=4 :
