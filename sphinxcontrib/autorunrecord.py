@@ -91,19 +91,10 @@ class RunRecord(LiteralInclude):
 
         # Get configuration values for the language
         args = config[language].split()
-        input_encoding = config.get(language + '_input_encoding', 'utf-8')
         output_encoding = config.get(language + '_output_encoding', 'utf-8')
-        prefix_str = config.get(language + '_prefix_str', '')
 
         # Build the code text
-        code = self.options.get('realcommand', None)
-        if code is None:
-            codelines = (
-                line[len(prefix_str):] if line.startswith(prefix_str) else line
-                for line in self.content
-            )
-            code = u'\n'.join(codelines)
-        code = code.encode(input_encoding)
+        code = self.get_code(encode=True)
 
         proc = Popen(
             args,
@@ -130,15 +121,23 @@ class RunRecord(LiteralInclude):
         capture_file.write_text(out)
 
 
-    def write_cast(self, capture_file_cast):
-        """Write a cast from tagged code examples"""
+    def get_code(self, encode=False):
+        """Extract code examples from a runrecord
+
+        Parameters
+        ----------
+        encode : bool
+            If True, encode code according to AutoRunRecords config
+        Returns
+        -------
+        code : str
+        """
+
         config = AutoRunRecord.config
         language = self.options.get('language', 'console')
         prefix_str = config.get(language + '_prefix_str', '')
+        input_encoding = config.get(language + '_input_encoding', 'utf-8')
 
-        caption = self.options.get('caption', '(no caption)')
-
-        # Build the code text; first try realcommand
         code = self.options.get('realcommand', None)
         if code is None:
             codelines = (
@@ -147,6 +146,11 @@ class RunRecord(LiteralInclude):
                 for line in self.content
             )
             code = u'\n'.join(codelines)
+        if encode:
+            code = code.encode(input_encoding)
+        return code
+
+
         # write the cast
         # TODO: make clean has to clean the casts, else we'll append and
         # append and append with every build from scratch
