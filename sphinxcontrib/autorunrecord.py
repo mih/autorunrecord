@@ -151,13 +151,20 @@ class RunRecord(LiteralInclude):
         return code
 
 
+    def write_cast(self, capture_file_cast):
+        """Write a cast from tagged code examples"""
+        import shlex
+        caption = self.options.get('caption', None)
+        code = self.get_code(encode=False)
+        # Build the code text; first try realcommand
         # write the cast
         # TODO: make clean has to clean the casts, else we'll append and
         # append and append with every build from scratch
         mode = 'a' if capture_file_cast.exists() else 'w'
         with open(capture_file_cast, mode) as f:
-            f.write('say "' + caption + '"\n')
-            f.write('run "' + code + '"\n')
+            if caption is not None:
+                f.write('say {}\n'.format(shlex.quote(caption)))
+            f.write('run {}\n'.format(shlex.quote(code)))
 
 
 def setup(app):
