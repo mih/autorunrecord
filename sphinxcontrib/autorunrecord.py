@@ -42,6 +42,8 @@ class RunRecord(LiteralInclude):
         language=directives.unchanged_required,
         realcommand=directives.unchanged_required,
         workdir=directives.unchanged_required,
+        tag=directives.unchanged,
+        caption=directives.unchanged
     )
 
     def run(self):
@@ -65,6 +67,21 @@ class RunRecord(LiteralInclude):
                 work_dir,
                 self.config.autorunrecord_env,
             )
+
+        # TODO: do not build cast by default, rely on some sort of env
+        # variable in the flavor or CAST=True
+        # !! requires variable CAST_DIR in conf.py! for me currently:
+        # '/home/adina/repos/datalad-handbook/casts'
+        cast_dir = Path(self.config.autorunrecord_env['CAST_DIR'])
+        if not cast_dir.exists():
+            cast_dir.mkdir()
+        cast = self.options.get('tag', None)
+        if cast is not None:
+            capture_file_cast = Path(self.config.autorunrecord_env['CAST_DIR']) /\
+                                cast
+            # TODO: this needs to aggregate several snippets, without
+            # appending over and over again after each make...
+            self.write_cast(capture_file_cast)
 
         docnodes = super(RunRecord, self).run()
         return docnodes
@@ -114,6 +131,32 @@ class RunRecord(LiteralInclude):
         if not capture_file.parent.exists():
             capture_file.parent.mkdir(parents=True)
         capture_file.write_text(out)
+
+
+    def write_cast(self, capture_file_cast):
+        """Write a cast from tagged code examples"""
+        config = AutoRunRecord.config
+        language = self.options.get('language', 'console')
+        prefix_str = config.get(language + '_prefix_str', '')
+
+        caption = self.options.get('caption', '(no caption)')
+
+        # Build the code text; first try realcommand
+        code = self.options.get('realcommand', None)
+        if code is None:
+            codelines = (
+                line[len(prefix_str):] if line.startswith(
+                    prefix_str) else line
+                for line in self.content
+            )
+            code = u'\n'.join(codelines)
+        # write the cast
+        # TODO: make clean has to clean the casts, else we'll append and
+        # append and append with every build from scratch
+        mode = 'a' if capture_file_cast.exists() else 'w'
+        with open(capture_file_cast, mode) as f:
+            f.write('say "' + caption + '"\n')
+            f.write('run "' + code + '"\n')
 
 
 def setup(app):
