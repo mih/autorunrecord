@@ -68,20 +68,17 @@ class RunRecord(LiteralInclude):
                 self.config.autorunrecord_env,
             )
 
-        # TODO: do not build cast by default, rely on some sort of env
-        # variable in the flavor or CAST=True
-        # !! requires variable CAST_DIR in conf.py! for me currently:
-        # '/home/adina/repos/datalad-handbook/casts'
-        cast_dir = Path(self.config.autorunrecord_env['CAST_DIR'])
-        if not cast_dir.exists():
-            cast_dir.mkdir()
-        cast = self.options.get('tag', None)
-        if cast is not None:
-            capture_file_cast = Path(self.config.autorunrecord_env['CAST_DIR']) /\
-                                cast
-            # TODO: this needs to aggregate several snippets, without
-            # appending over and over again after each make...
-            self.write_cast(capture_file_cast)
+        # to build cast, have CAST_DIR env variable configured with path
+        cast_dir = self.config.autorunrecord_env.get('CAST_DIR')
+        if cast_dir:
+            cast_dir = Path(cast_dir)
+            if not cast_dir.exists():
+                cast_dir.mkdir()
+            # get file name where to write the cast to
+            cast = self.options.get('tag', None)
+            if cast is not None:
+                capture_file_cast = cast_dir / cast
+                self.write_cast(capture_file_cast)
 
         docnodes = super(RunRecord, self).run()
         return docnodes
