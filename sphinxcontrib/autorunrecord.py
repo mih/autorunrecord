@@ -42,6 +42,8 @@ class RunRecord(LiteralInclude):
         language=directives.unchanged_required,
         realcommand=directives.unchanged_required,
         workdir=directives.unchanged_required,
+        cast=directives.unchanged,
+        caption=directives.unchanged
     )
 
     def run(self):
@@ -66,6 +68,18 @@ class RunRecord(LiteralInclude):
                 self.config.autorunrecord_env,
             )
 
+        # to build cast, have CAST_DIR env variable configured with path
+        cast_dir = self.config.autorunrecord_env.get('CAST_DIR')
+        if cast_dir:
+            cast_dir = Path(cast_dir)
+            if not cast_dir.exists():
+                cast_dir.mkdir()
+            # get file name where to write the cast to
+            cast = self.options.get('cast', None)
+            if cast is not None:
+                capture_file_cast = cast_dir / cast
+                self.write_cast(capture_file_cast)
+
         docnodes = super(RunRecord, self).run()
         return docnodes
 
@@ -77,19 +91,10 @@ class RunRecord(LiteralInclude):
 
         # Get configuration values for the language
         args = config[language].split()
-        input_encoding = config.get(language + '_input_encoding', 'utf-8')
         output_encoding = config.get(language + '_output_encoding', 'utf-8')
-        prefix_str = config.get(language + '_prefix_str', '')
 
         # Build the code text
-        code = self.options.get('realcommand', None)
-        if code is None:
-            codelines = (
-                line[len(prefix_str):] if line.startswith(prefix_str) else line
-                for line in self.content
-            )
-            code = u'\n'.join(codelines)
-        code = code.encode(input_encoding)
+        code = self.get_code(encode=True)
 
         proc = Popen(
             args,
@@ -114,6 +119,52 @@ class RunRecord(LiteralInclude):
         if not capture_file.parent.exists():
             capture_file.parent.mkdir(parents=True)
         capture_file.write_text(out)
+
+
+    def get_code(self, encode=False):
+        """Extract code examples from a runrecord
+
+        Parameters
+        ----------
+        encode : bool
+            If True, encode code according to AutoRunRecords config
+        Returns
+        -------
+        code : str
+        """
+
+        config = AutoRunRecord.config
+        language = self.options.get('language', 'console')
+        prefix_str = config.get(language + '_prefix_str', '')
+        input_encoding = config.get(language + '_input_encoding', 'utf-8')
+
+        code = self.options.get('realcommand', None)
+        if code is None:
+            codelines = (
+                line[len(prefix_str):] if line.startswith(
+                    prefix_str) else line
+                for line in self.content
+            )
+            code = u'\n'.join(codelines)
+        if encode:
+            code = code.encode(input_encoding)
+        return code
+
+
+    def write_cast(self, capture_file_cast):
+        """Write a cast from tagged code examples"""
+        import shlex
+        caption = self.options.get('caption', None)
+        code = self.get_code(encode=False)
+        # Build the code text; first try realcommand
+        # write the cast
+        # TODO: make clean has to clean the casts, else we'll append and
+        # append and append with every build from scratch
+        mode = 'a' if capture_file_cast.exists() else 'w'
+        with open(capture_file_cast, mode) as f:
+            if caption is not None:
+                f.write('say {}\n'.format(shlex.quote(caption)))
+            f.write('run {}\n'.format(shlex.quote(code)))
 
 
 def setup(app):
