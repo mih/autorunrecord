@@ -42,7 +42,7 @@ class RunRecord(LiteralInclude):
         language=directives.unchanged_required,
         realcommand=directives.unchanged_required,
         workdir=directives.unchanged_required,
-        tag=directives.unchanged,
+        cast=directives.unchanged,
         caption=directives.unchanged
     )
 
@@ -75,7 +75,7 @@ class RunRecord(LiteralInclude):
             if not cast_dir.exists():
                 cast_dir.mkdir()
             # get file name where to write the cast to
-            cast = self.options.get('tag', None)
+            cast = self.options.get('cast', None)
             if cast is not None:
                 capture_file_cast = cast_dir / cast
                 self.write_cast(capture_file_cast)
