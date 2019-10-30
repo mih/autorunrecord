@@ -15,6 +15,7 @@ from docutils.parsers.rst import directives
 from sphinx.errors import SphinxError
 from sphinx.directives.code import LiteralInclude
 
+castcount = 0
 
 class RunRecordError(SphinxError):
     category = 'runrecord error'
@@ -77,8 +78,21 @@ class RunRecord(LiteralInclude):
             # get file name where to write the cast to
             cast = self.options.get('cast', None)
             if cast is not None:
+
+                # counter for code snippets
+                global castcount
+                castcount += 1
+
                 capture_file_cast = cast_dir / cast
+                code_cast = self.options.get('cast') + '_code.rst'
+                length = len(code_cast)
+                name = os.path.basename(capture_file_cast)
+                capture_code_list = cast_dir / code_cast
                 self.write_cast(capture_file_cast)
+                self.write_commands(capture_code_list,
+                                    castcount,
+                                    length,
+                                    name)
 
         docnodes = super(RunRecord, self).run()
         return docnodes
@@ -166,6 +180,21 @@ class RunRecord(LiteralInclude):
                 f.write('say {}\n'.format(shlex.quote(caption)))
             f.write('run {}\n'.format(shlex.quote(code)))
 
+
+    def write_commands(self, capture_code_list, castcount, length, name):
+        """Writes a list of all code commands from the runrecords into an
+        rst file, and formats code to be displayed as code by Sphinx."""
+        from textwrap import indent
+        code = self.get_code(encode=False)
+        code = indent(code, ' ' * 3)
+        mode = 'a' if capture_code_list.exists() else 'w'
+        with open(capture_code_list, mode) as f:
+            if mode == 'w':
+                header = "Code from cast: {}\n-------{}\n\n".format(name,
+                                                                    '-' * length)
+                f.write(header)
+            f.write('Code snippet {}::\n\n{}\n\n\n'.format(castcount,
+                                                              code))
 
 def setup(app):
     app.add_directive('runrecord', RunRecord)
