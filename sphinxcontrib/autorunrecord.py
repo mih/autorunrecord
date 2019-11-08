@@ -44,7 +44,7 @@ class RunRecord(LiteralInclude):
         realcommand=directives.unchanged_required,
         workdir=directives.unchanged_required,
         cast=directives.unchanged,
-        caption=directives.unchanged
+        notes=directives.unchanged
     )
 
     def run(self):
@@ -168,7 +168,7 @@ class RunRecord(LiteralInclude):
     def write_cast(self, capture_file_cast):
         """Write a cast from tagged code examples"""
         import shlex
-        caption = self.options.get('caption', None)
+        notes = self.options.get('notes', None)
         code = self.get_code(encode=False)
         # Build the code text; first try realcommand
         # write the cast
@@ -176,8 +176,8 @@ class RunRecord(LiteralInclude):
         # append and append with every build from scratch
         mode = 'a' if capture_file_cast.exists() else 'w'
         with open(capture_file_cast, mode) as f:
-            if caption is not None:
-                f.write('say {}\n'.format(shlex.quote(caption)))
+            if notes is not None:
+                f.write('say {}\n'.format(shlex.quote(notes)))
             f.write('run {}\n'.format(shlex.quote(code)))
 
 
