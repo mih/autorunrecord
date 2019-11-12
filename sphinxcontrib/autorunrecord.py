@@ -88,7 +88,7 @@ class RunRecord(LiteralInclude):
                 length = len(code_cast)
                 name = os.path.basename(capture_file_cast)
                 capture_code_list = cast_dir / code_cast
-                self.write_cast(capture_file_cast)
+                self.write_cast(capture_file_cast, castcount)
                 self.write_commands(capture_code_list,
                                     castcount,
                                     length,
@@ -165,11 +165,13 @@ class RunRecord(LiteralInclude):
         return code
 
 
-    def write_cast(self, capture_file_cast):
+    def write_cast(self, capture_file_cast, castcount):
         """Write a cast from tagged code examples"""
         import shlex
         notes = self.options.get('notes', None)
         code = self.get_code(encode=False)
+        counter = '### Code snippet {}\n'.format(castcount)
+        code = counter + code
         # Build the code text; first try realcommand
         # write the cast
         # TODO: make clean has to clean the casts, else we'll append and
