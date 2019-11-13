@@ -192,7 +192,7 @@ class RunRecord(LiteralInclude):
         mode = 'a' if capture_code_list.exists() else 'w'
         with open(capture_code_list, mode) as f:
             if mode == 'w':
-                header = "Code from cast: {}\n-------{}\n\n".format(name,
+                header = "Code from chapter: {}\n----------{}\n\n".format(name,
                                                                     '-' * length)
                 f.write(header)
             f.write('Code snippet {}::\n\n{}\n\n\n'.format(castcount,
