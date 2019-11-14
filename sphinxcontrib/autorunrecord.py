@@ -170,8 +170,8 @@ class RunRecord(LiteralInclude):
         import shlex
         notes = self.options.get('notes', None)
         code = self.get_code(encode=False)
-        counter = '### Code snippet {}\n'.format(castcount)
-        code = counter + code
+        code = '### Code snippet {}\n{}'.format(castcount,
+                                                code)
         # Build the code text; first try realcommand
         # write the cast
         # TODO: make clean has to clean the casts, else we'll append and
