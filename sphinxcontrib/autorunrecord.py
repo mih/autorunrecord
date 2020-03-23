@@ -153,6 +153,35 @@ class RunRecord(LiteralInclude):
         prefix_str = config.get(language + '_prefix_str', '')
         input_encoding = config.get(language + '_input_encoding', 'utf-8')
 
+        pushtarget = self.options.get('makepushtarget', None)
+        if pushtarget is not None:
+            import json
+            push_args = json.loads(pushtarget)
+            # safeguard against wrong specifications:
+            ds_path = push_args.get('ds_path', None)
+            name = push_args.get('name', None)
+            path = push_args.get('push_path',  None)
+            # can't get around quotes around 'True' or 'False' #TODO
+            annex = True if push_args.get('annex', None) == 'True' else False
+            bare = True if push_args.get('bare', None) == 'True' else False
+            if None in (ds_path, path, name):
+                raise Exception('Please specify a ds_path, push_path, a sibling name '
+                                'to create a push target. '
+                                'Your current specification is: ds_path = {}, '
+                                'push_path = {}, name = {}'.format(ds_path, name, path))
+            try:
+                makepushtarget(ds_path, name, path, annex, bare)
+            except Exception as e:
+                print(
+                """
+                Makepushtarget failed. Check for mispecified arguments.
+                Use makepushtarget with a dictionary like this:
+                {"ds_path": "/home/me/dl-101/DataLad-101/midterm_project",
+                "name": "github", "push_path": "/home/me/pushes/midtermproject",
+                "annex": "False", "bare": "True"}
+                """)
+                print('Encountered the following error: {}'.format(e))
+
         code = self.options.get('realcommand', None)
         if code is None:
             codelines = (
