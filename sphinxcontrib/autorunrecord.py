@@ -42,6 +42,7 @@ class RunRecord(LiteralInclude):
         LiteralInclude.option_spec,
         language=directives.unchanged_required,
         realcommand=directives.unchanged_required,
+        makepushtarget=directives.unchanged,
         workdir=directives.unchanged_required,
         cast=directives.unchanged,
         notes=directives.unchanged
