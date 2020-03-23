@@ -228,6 +228,33 @@ class RunRecord(LiteralInclude):
             f.write('Code snippet {}::\n\n{}\n\n\n'.format(castcount,
                                                               code))
 
+def makepushtarget(ds_path,
+                   name,
+                   push_path,
+                   annex=False,
+                   bare=True):
+    """
+    Helper: create a push target to pretend a push to a sibling.
+    This will create a new repository under 'push_path', and register
+    it as a sibling of name 'name' to the dataset given with 'ds_path'
+    """
+
+    from datalad.core.distributed.tests.test_push import \
+        mk_push_target
+    from datalad.api import Dataset
+    import os.path as op
+
+    #prevent existing paths being overwritten
+    if op.exists(push_path):
+        raise Exception("The push path {} already exits!".format(push_path))
+
+    mk_push_target(ds=Dataset(ds_path),
+                   name=name,
+                   path=push_path,
+                   annex=annex,
+                   bare=bare)
+
+
 def setup(app):
     app.add_directive('runrecord', RunRecord)
     app.connect('builder-inited', AutoRunRecord.builder_init)
