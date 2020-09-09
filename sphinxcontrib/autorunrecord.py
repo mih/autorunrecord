@@ -112,7 +112,7 @@ class RunRecord(LiteralInclude):
 
         proc = Popen(
             args,
-            bufsize=1,
+            bufsize=-1,
             stdin=PIPE,
             stdout=PIPE,
             # capture both in a merged stream
