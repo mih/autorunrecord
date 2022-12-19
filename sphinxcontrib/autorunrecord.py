@@ -17,6 +17,7 @@ from sphinx.directives.code import LiteralInclude
 
 castcount = 0
 
+
 class RunRecordError(SphinxError):
     category = 'runrecord error'
 
@@ -134,7 +135,6 @@ class RunRecord(LiteralInclude):
             capture_file.parent.mkdir(parents=True)
         capture_file.write_text(out)
 
-
     def get_code(self, encode=False):
         """Extract code examples from a runrecord
 
@@ -164,7 +164,6 @@ class RunRecord(LiteralInclude):
             code = code.encode(input_encoding)
         return code
 
-
     def write_cast(self, capture_file_cast, castcount):
         """Write a cast from tagged code examples"""
         import shlex
@@ -182,7 +181,6 @@ class RunRecord(LiteralInclude):
                 f.write('say {}\n'.format(shlex.quote(notes)))
             f.write('run {}\n'.format(shlex.quote(code)))
 
-
     def write_commands(self, capture_code_list, castcount, length, name):
         """Writes a list of all code commands from the runrecords into an
         rst file, and formats code to be displayed as code by Sphinx."""
@@ -192,16 +190,25 @@ class RunRecord(LiteralInclude):
         mode = 'a' if capture_code_list.exists() else 'w'
         with open(capture_code_list, mode) as f:
             if mode == 'w':
-                header = "Code from chapter: {}\n----------{}\n\n".format(name,
-                                                                    '-' * length)
+                header = "Code from chapter: {}\n----------{}\n\n".format(
+                    name,
+                    '-' * length,
+                )
                 f.write(header)
-            f.write('Code snippet {}::\n\n{}\n\n\n'.format(castcount,
-                                                              code))
+            f.write('Code snippet {}::\n\n{}\n\n\n'.format(
+                castcount,
+                code,
+            ))
+
 
 def setup(app):
     app.add_directive('runrecord', RunRecord)
     app.connect('builder-inited', AutoRunRecord.builder_init)
-    app.add_config_value('autorunrecord_languages', AutoRunRecord.config, 'env')
+    app.add_config_value(
+        'autorunrecord_languages',
+        AutoRunRecord.config,
+        'env',
+    )
     app.add_config_value('autorunrecord_basedir', None, 'env')
     app.add_config_value('autorunrecord_env', None, 'env')
 
