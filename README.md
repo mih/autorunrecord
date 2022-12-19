@@ -102,6 +102,8 @@ need to be cleaned up separately.
 
 ## Additional options
 
+### Hidden commands: `realcommand`
+
 Sometimes it is necessary to simplify a command to be included in the document
 in comparison to a command that is executed to generate a desired output.  A
 "hidden" `realcommand` can include error-handling, or retry-logic for remote
@@ -110,3 +112,23 @@ associated complexity on a documentation reader. A `:realcommand:` option can
 be declared in a `runrecord` with any such alternative command. If found,
 command lines from the `runrecord` directive's body are merely copied into the
 output, and `realcommand` is executed instead.
+
+### Output normalization
+
+When command output is tracked in a version control system, or is generated
+by multiple entities, it can make sense to normalize it. For example, to
+standardize timestamps, line-endings, or user names.
+
+The configuration setting `autorunrecord_line_replace` can be set in `conf.py`.
+It must be a list with 2-tuples. The first item in each tuple is a match
+expression, and the second item a replacement value. The syntax for both must
+match the requirements of the `sub()` function of the Python `re` module.
+As indicated by the configuration item name, the replacement (matching) is
+performed line-by-line.
+
+Here is an example for removing trailing spaces on each output line:
+
+    autorunrecord_line_replace = [
+        # trailing space removal
+        (r'[ ]+$', ''),
+    ]

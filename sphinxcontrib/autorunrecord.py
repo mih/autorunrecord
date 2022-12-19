@@ -5,6 +5,7 @@ import os
 from six import (
     text_type,
 )
+import re
 from subprocess import (
     Popen,
     PIPE,
@@ -125,10 +126,18 @@ class RunRecord(LiteralInclude):
         # Run the code
         stdout, stderr = proc.communicate(code)
 
+        # turn into str
+        output = stdout.decode(output_encoding)
+
+        line_replace = self.config.autorunrecord_line_replace
+        if line_replace:
+            for repl_match, repl in line_replace:
+                output = re.sub(repl_match, repl, output, flags=re.MULTILINE)
+
         # Process output
         out = '{}\n{}'.format(
-            u'\n'.join(self.content),
-            stdout.decode(output_encoding),
+            '\n'.join(self.content),
+            output,
         )
 
         if not capture_file.parent.exists():
@@ -211,5 +220,6 @@ def setup(app):
     )
     app.add_config_value('autorunrecord_basedir', None, 'env')
     app.add_config_value('autorunrecord_env', None, 'env')
+    app.add_config_value('autorunrecord_line_replace', None, 'env')
 
 # vim: set expandtab shiftwidth=4 softtabstop=4 :
