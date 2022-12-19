@@ -1,5 +1,6 @@
 clean:
-	rm -rf build dist
+	rm -rf build dist *.egg-info
+	find . -name __pycache__ -type d -exec rm -rf {} \;
 
 release-pypi:
 	# better safe than sorry
