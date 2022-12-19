@@ -132,3 +132,21 @@ Here is an example for removing trailing spaces on each output line:
         # trailing space removal
         (r'[ ]+$', ''),
     ]
+
+Normalization expressions can also be configured per `runrecord` using the
+`:linereplace:` field. Each line in the body of this field is considered
+a replacement specification. The syntax is similar to UNIX `sed`. The first
+character on the line defines a delimiting character. This delimiter must
+also be repeated as the last character on that line. The only other occurrence
+of this character must be the boundary between match expression and
+replacement expression. Here is an example to replace a particular path name
+with a placeholder.
+
+    .. runrecord:: output1
+       :language: console
+       :linereplace:
+         %/home/myname/%HOME%
+
+Any number of replacement specifications can be provided. They will be
+executed in the order of their specification and *following* any specifications
+declared via `autorunrecord_line_replace` in `conf.py`.

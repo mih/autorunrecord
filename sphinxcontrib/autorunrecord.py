@@ -45,8 +45,9 @@ class RunRecord(LiteralInclude):
         language=directives.unchanged_required,
         realcommand=directives.unchanged_required,
         workdir=directives.unchanged_required,
+        linereplace=directives.unchanged,
         cast=directives.unchanged,
-        notes=directives.unchanged
+        notes=directives.unchanged,
     )
 
     def run(self):
@@ -129,7 +130,16 @@ class RunRecord(LiteralInclude):
         # turn into str
         output = stdout.decode(output_encoding)
 
-        line_replace = self.config.autorunrecord_line_replace
+        line_replace = self.config.autorunrecord_line_replace or []
+        # suck in replacement expressions for this runrecord
+        for repl_str in self.options.get('linereplace', '').splitlines():
+            # not using maxsplit to have it fail when there is more than one
+            delim = repl_str[0]
+            # sed-like syntax, delimiter must be first and last
+            assert repl_str[-1] == delim
+            split = repl_str.split(delim)
+            assert len(split) == 4
+            line_replace.append(split[1:3])
         if line_replace:
             for repl_match, repl in line_replace:
                 output = re.sub(repl_match, repl, output, flags=re.MULTILINE)
