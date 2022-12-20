@@ -150,3 +150,17 @@ with a placeholder.
 Any number of replacement specifications can be provided. They will be
 executed in the order of their specification and *following* any specifications
 declared via `autorunrecord_line_replace` in `conf.py`.
+
+### Expected failures
+
+By default, the code of a runrecord is expected to execute without errors
+yielding an exitcode of zero. If that is not the case, a `RuntimeException` is
+raised. However, it is often educational to demonstrate error conditions.
+To enable purposeful execution errors, a `runrecord` can be annotated with
+an `exitcode` option to declare expected exitcodes (other than 0):
+
+    .. runrecord:: output1
+       :language: console
+       :exitcode: 3
+
+       $ exit 3

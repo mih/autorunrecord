@@ -43,6 +43,9 @@ class RunRecord(LiteralInclude):
         realcommand=directives.unchanged_required,
         workdir=directives.unchanged_required,
         linereplace=directives.unchanged,
+        # to be expected exit code. defaults to zero.
+        # causes exception if mismatch
+        exitcode=directives.nonnegative_int,
         cast=directives.unchanged,
         notes=directives.unchanged,
     )
@@ -123,6 +126,15 @@ class RunRecord(LiteralInclude):
 
         # Run the code
         stdout, stderr = proc.communicate(code)
+
+        if proc.returncode != self.options.get('exitcode', 0):
+            raise RuntimeError(
+                "Executing runrecord {}:{} yielded unexpected exitcode {}".format(
+                    self.state_machine.get_source(self.lineno),
+                    self.lineno,
+                    proc.returncode,
+                )
+            )
 
         # turn into str
         output = stdout.decode(output_encoding)
