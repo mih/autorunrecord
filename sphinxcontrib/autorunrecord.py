@@ -2,9 +2,6 @@
 
 from pathlib import Path
 import os
-from six import (
-    text_type,
-)
 import re
 from subprocess import (
     Popen,
@@ -120,7 +117,7 @@ class RunRecord(LiteralInclude):
             stdout=PIPE,
             # capture both in a merged stream
             stderr=STDOUT,
-            cwd=text_type(work_dir),
+            cwd=str(work_dir),
             env=env,
         )
 
