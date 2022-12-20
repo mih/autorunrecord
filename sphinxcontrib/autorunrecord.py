@@ -42,6 +42,8 @@ class RunRecord(LiteralInclude):
         language=directives.unchanged_required,
         realcommand=directives.unchanged_required,
         workdir=directives.unchanged_required,
+        # VAR=value, one per line
+        env=directives.unchanged_required,
         linereplace=directives.unchanged,
         # to be expected exit code. defaults to zero.
         # causes exception if mismatch
@@ -113,6 +115,15 @@ class RunRecord(LiteralInclude):
         # Build the code text
         code = self.get_code(encode=True)
 
+        # suck in ENV updates for this runrecord
+        env = dict(
+            env,
+            **dict(
+                line.split('=', maxsplit=1)
+                for line in self.options.get('env', '').splitlines()
+            )
+        )
+
         proc = Popen(
             args,
             bufsize=-1,
@@ -139,7 +150,8 @@ class RunRecord(LiteralInclude):
         # turn into str
         output = stdout.decode(output_encoding)
 
-        line_replace = self.config.autorunrecord_line_replace or []
+        # wrap in new list to avoid in-place modification
+        line_replace = list(self.config.autorunrecord_line_replace or [])
         # suck in replacement expressions for this runrecord
         for repl_str in self.options.get('linereplace', '').splitlines():
             # not using maxsplit to have it fail when there is more than one

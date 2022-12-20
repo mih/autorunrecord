@@ -164,3 +164,16 @@ an `exitcode` option to declare expected exitcodes (other than 0):
        :exitcode: 3
 
        $ exit 3
+
+### Tailored environments
+
+In addition to the global `autorunrecord_env` configuration, it is also possible
+to tailor the execution environment of individual runrecords by declaring
+variables and values via the `:env:` field of the directive. The syntax is
+one declaration per line, with variable names separated from their values
+with `=`. Example:
+
+    .. runrecord:: output1
+       :language: console
+       :env:
+         MYENV=myvalue
