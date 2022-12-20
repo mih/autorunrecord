@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from pathlib import Path
-import os
+from os import path as op
 import re
 from subprocess import (
     Popen,
@@ -21,8 +21,8 @@ class RunRecordError(SphinxError):
 
 
 class AutoRunRecord(object):
-    here = os.path.abspath(__file__)
-    pycon = os.path.join(os.path.dirname(here),'pycon.py')
+    here = op.abspath(__file__)
+    pycon = op.join(op.dirname(here),'pycon.py')
     config = dict(
         pycon='python ' + pycon,
         pycon_prefix_str='>>> ',
@@ -86,7 +86,7 @@ class RunRecord(LiteralInclude):
                 capture_file_cast = cast_dir / cast
                 code_cast = self.options.get('cast') + '_code.rst'
                 length = len(code_cast)
-                name = os.path.basename(capture_file_cast)
+                name = op.basename(capture_file_cast)
                 capture_code_list = cast_dir / code_cast
                 self.write_cast(capture_file_cast, castcount)
                 self.write_commands(capture_code_list,
