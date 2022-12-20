@@ -21,10 +21,10 @@ class RunRecordError(SphinxError):
 
 
 class AutoRunRecord(object):
-    here = op.abspath(__file__)
-    pycon = op.join(op.dirname(here),'pycon.py')
+    # locate helper that prints and executes Python code like a shell
+    pycon = Path(__file__).parent / 'pycon.py'
     config = dict(
-        pycon='python ' + pycon,
+        pycon=f'python {pycon}',
         pycon_prefix_str='>>> ',
         console='bash',
         console_prefix_str='$ ',
