@@ -138,17 +138,19 @@ class RunRecord(LiteralInclude):
         # Run the code
         stdout, stderr = proc.communicate(code)
 
+        # turn into str
+        output = stdout.decode(output_encoding)
+
         if proc.returncode != self.options.get('exitcode', 0):
             raise RuntimeError(
-                "Executing runrecord {}:{} yielded unexpected exitcode {}".format(
+                ("Executing runrecord {}:{} yielded unexpected exitcode {}"
+                 " Captured output: {}").format(
                     self.state_machine.get_source(self.lineno),
                     self.lineno,
                     proc.returncode,
+                    output,
                 )
             )
-
-        # turn into str
-        output = stdout.decode(output_encoding)
 
         # wrap in new list to avoid in-place modification
         line_replace = list(self.config.autorunrecord_line_replace or [])
