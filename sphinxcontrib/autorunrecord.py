@@ -63,7 +63,7 @@ class RunRecord(LiteralInclude):
             'workdir',
             # default is to place the workdir under a relpath that
             # is the same as the source file's in the doc tree
-            src_file.relative_to(doc_dir).parent / src_file.stem)
+            src_file.absolute().relative_to(doc_dir).parent / src_file.stem)
         if not capture_file.exists():
             if not work_dir.exists():
                 work_dir.mkdir(parents=True)
