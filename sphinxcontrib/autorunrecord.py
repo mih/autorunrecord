@@ -1,6 +1,9 @@
 # -*- coding: utf-8 -*-
 
-from pathlib import Path
+from pathlib import (
+    Path,
+    PurePosixPath,
+)
 from os import path as op
 import re
 from subprocess import (
@@ -55,7 +58,12 @@ class RunRecord(LiteralInclude):
     def run(self):
         doc_dir = Path(self.env.srcdir)
         src_file = Path(self.state_machine.get_source(self.lineno))
-        capture_file = src_file.parent / self.arguments[0]
+        # interpret capture file as relative to the document, or
+        # as absolute, anchored on the top-level source dir
+        # (like literalinclude)
+        cfile = PurePosixPath(self.arguments[0])
+        capture_file = doc_dir / self.arguments[0][1:] \
+            if cfile.is_absolute() else src_file.parent / cfile
         base_wdir = Path(self.env.app.doctreedir).parent \
             if self.config.autorunrecord_basedir is None \
             else Path(self.config.autorunrecord_basedir)
